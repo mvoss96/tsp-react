@@ -25,7 +25,7 @@ function MapComponent({ cities }) {
       center={[52.521918, 13.413215]}
       bounds={bounds}
       boundsOptions={{ padding: [20, 20] }}
-      zoom={1}
+      zoom={3}
       zoomControl={false}
       doubleClickZoom={false}
       scrollWheelZoom={false}
