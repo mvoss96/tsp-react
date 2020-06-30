@@ -1,23 +1,24 @@
 import React from "react";
-import { Map, Marker, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { Map, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import icon from "leaflet/dist/images/marker-icon.png";
-import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import "leaflet/dist/leaflet.css";
 
 //fixing react-leaflet's broken default marker icon
-let DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+    iconUrl: require('leaflet/dist/images/marker-icon.png'),
+    shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
-L.Marker.prototype.options.icon = DefaultIcon;
+
+
 
 function MapComponent({ cities }) {
   let bounds = null;
   if (cities.length >= 2) {
     bounds = L.latLngBounds();
     cities.forEach((city) => {
-      bounds.extend(city);
+      bounds.extend([city[0], city[1]]);
     });
   }
   return (
@@ -37,8 +38,21 @@ function MapComponent({ cities }) {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
       {cities.map((city, index) => {
-        console.log(city);
-        return <Marker position={city} key={index}></Marker>;
+        return (
+          <Marker
+            position={[city[0], city[1]]}
+            key={index}
+            onMouseOver={(e) => {
+              e.target.openPopup();
+            }}
+            onMouseOut={(e) => {
+              e.target.closePopup();
+            }}
+          >
+            {" "}
+            <Popup>{city[2]}</Popup>
+          </Marker>
+        );
       })}
     </Map>
   );
