@@ -15,6 +15,9 @@ function App() {
 
   const fileLoadHandler = (event) => {
     let loadedFile = event.target.files[0];
+    if (!loadedFile){
+      return
+    }
     var reader = new FileReader();
     reader.onload = function (event) {
       let result = event.target.result;
