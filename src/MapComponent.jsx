@@ -1,6 +1,6 @@
 import React from "react";
-import { Map, Marker, Popup, TileLayer} from "react-leaflet";
-import Polyline  from 'react-leaflet-arrowheads'
+import { Map, Marker, Popup, TileLayer } from "react-leaflet";
+import Polyline from "react-leaflet-arrowheads";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -15,6 +15,7 @@ const circleIconActive = new L.Icon({
 });
 
 function MapComponent({ cities, solution, startCity }) {
+  //set the zoom od the map to fit all markers
   let bounds = null;
   if (cities.length >= 2) {
     bounds = L.latLngBounds();
@@ -22,9 +23,11 @@ function MapComponent({ cities, solution, startCity }) {
       bounds.extend([city[0], city[1]]);
     });
   }
+
+  //reder the map
   return (
     <Map
-      center={[52.521918, 13.413215]}
+      center={[52.521918, 13.413215]} //default view (germany)
       bounds={bounds}
       boundsOptions={{ padding: [20, 20] }}
       zoom={3}
@@ -38,7 +41,8 @@ function MapComponent({ cities, solution, startCity }) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
-      {cities.map((city, index) => {
+      {//Place markers  for all cities
+      cities.map((city, index) => {
         return (
           <Marker
             icon={index === startCity ? circleIconActive : circleIcon}

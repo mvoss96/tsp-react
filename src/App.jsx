@@ -15,6 +15,7 @@ function App() {
   const [startCity, setStartCity] = useState(null);
   const [solution, setSolution] = useState([]);
   const [solutionDistance, setSolutionDistance] = useState(null);
+
   const fileLoadHandler = (event) => {
     let loadedFile = event.target.files[0];
     if (!loadedFile) {
@@ -66,7 +67,7 @@ function App() {
     }
     console.log(distMatrix);
     //greedy nearest neighbour algorithm for finding a first solution:
-    //starting at the startCity always choose the shortest trip to an unvisited city.
+    //starting at the startCity then always choose the shortest trip to an unvisited city.
     //Do this until all citys are visited
     let solution = [startCity];
     let totalDistance = 0;
@@ -95,6 +96,7 @@ function App() {
     setSolutionDistance(totalDistance);
   };
 
+  //render the app
   return (
     <Paper style={{ margin: "1.5vh", overflow: "hidden", height: "97vh" }}>
       <Grid container spacing={0} style={{ height: "100%" }}>
@@ -157,7 +159,7 @@ function App() {
                     value={startCity !== null ? startCity : ""}
                     onChange={(e) => {
                       setStartCity(e.target.value);
-                      setSolution([])
+                      setSolution([]);
                     }}
                   >
                     {cities.map((city, index) => {
