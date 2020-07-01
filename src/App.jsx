@@ -14,7 +14,7 @@ function App() {
   const [cities, setCities] = useState([]);
   const [startCity, setStartCity] = useState(null);
   const [solution, setSolution] = useState([]);
-
+  const [solutionDistance, setSolutionDistance] = useState(null);
   const fileLoadHandler = (event) => {
     let loadedFile = event.target.files[0];
     if (!loadedFile) {
@@ -64,19 +64,46 @@ function App() {
         distMatrix[i][j] = pointFrom.distanceTo(new LatLng(to[0], to[1]));
       }
     }
-    console.log(distMatrix); 
-    //greedy nearest neighbour algorithm for finding a first solution: 
-    //starting at the startCity always choose the shortest Trip to an unvisited city.
-    let solution = [startCity]
+    console.log(distMatrix);
+    //greedy nearest neighbour algorithm for finding a first solution:
+    //starting at the startCity always choose the shortest trip to an unvisited city.
+    //Do this until all citys are visited
+    let solution = [startCity];
+    let totalDistance = 0;
+    while (solution.length < cities.length) {
+      let nearest, shortestDistance;
+      let currentCity = solution[solution.length - 1]; //last entry
+      for (let [index, distance] of distMatrix[currentCity].entries()) {
+        if (
+          !solution.includes(index) &&
+          (distance < shortestDistance || shortestDistance === undefined)
+        ) {
+          shortestDistance = distance;
+          nearest = index;
+        }
+      }
+      totalDistance += shortestDistance;
+      solution.push(nearest);
+    }
+    //add way back to solution
+    totalDistance += distMatrix[solution[solution.length - 1]][startCity];
+    solution.push(startCity);
 
-    console.log(solution); 
+    console.log(solution);
+    console.log(totalDistance);
+    setSolution(solution);
+    setSolutionDistance(totalDistance);
   };
 
   return (
     <Paper style={{ margin: "1.5vh", overflow: "hidden", height: "97vh" }}>
       <Grid container spacing={0} style={{ height: "100%" }}>
         <Grid item xs={12} sm={8}>
-          <MapComponent cities={cities}></MapComponent>
+          <MapComponent
+            cities={cities}
+            solution={solution}
+            startCity={startCity}
+          ></MapComponent>
         </Grid>
         <Grid item xs={12} sm={4}>
           <div style={{ height: "100%", padding: "5px" }}>
@@ -114,7 +141,7 @@ function App() {
                     variant="contained"
                     color="primary"
                     component="span"
-                    disabled={(startCity===null)}
+                    disabled={startCity === null}
                     style={{ marginTop: 5 }}
                     onClick={calcWay}
                   >
@@ -127,7 +154,7 @@ function App() {
                     labelId="startCityLabel"
                     disabled={!cities.length}
                     id="startCity"
-                    value={startCity!==null ? startCity : ""}
+                    value={startCity !== null ? startCity : ""}
                     onChange={(e) => {
                       setStartCity(e.target.value);
                     }}

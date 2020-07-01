@@ -1,19 +1,20 @@
 import React from "react";
-import { Map, Marker, Popup, TileLayer } from "react-leaflet";
+import { Map, Marker, Popup, TileLayer} from "react-leaflet";
+import Polyline  from 'react-leaflet-arrowheads'
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-//fixing react-leaflet's broken default marker icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-    iconUrl: require('leaflet/dist/images/marker-icon.png'),
-    shadowUrl: require('leaflet/dist/images/marker-shadow.png')
+const circleIcon = new L.Icon({
+  iconUrl: require("./doubleCircle.png"),
+  iconSize: [16, 16],
 });
 
+const circleIconActive = new L.Icon({
+  iconUrl: require("./doubleCircleActive.png"),
+  iconSize: [16, 16],
+});
 
-
-function MapComponent({ cities }) {
+function MapComponent({ cities, solution, startCity }) {
   let bounds = null;
   if (cities.length >= 2) {
     bounds = L.latLngBounds();
@@ -40,6 +41,7 @@ function MapComponent({ cities }) {
       {cities.map((city, index) => {
         return (
           <Marker
+            icon={index === startCity ? circleIconActive : circleIcon}
             position={[city[0], city[1]]}
             key={index}
             onMouseOver={(e) => {
@@ -54,6 +56,12 @@ function MapComponent({ cities }) {
           </Marker>
         );
       })}
+      <Polyline
+        positions={solution.map((i) => {
+          return cities[i];
+        })}
+        arrowheads
+      ></Polyline>
     </Map>
   );
 }
