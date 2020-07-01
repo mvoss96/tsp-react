@@ -157,6 +157,7 @@ function App() {
                     value={startCity !== null ? startCity : ""}
                     onChange={(e) => {
                       setStartCity(e.target.value);
+                      setSolution([])
                     }}
                   >
                     {cities.map((city, index) => {
