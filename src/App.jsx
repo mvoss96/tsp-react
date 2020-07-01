@@ -8,15 +8,17 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import { LatLng } from "leaflet";
 
 function App() {
   const [cities, setCities] = useState([]);
-  const [startCity, setStartCity] = useState([]);
+  const [startCity, setStartCity] = useState(null);
+  const [solution, setSolution] = useState([]);
 
   const fileLoadHandler = (event) => {
     let loadedFile = event.target.files[0];
-    if (!loadedFile){
-      return
+    if (!loadedFile) {
+      return;
     }
     var reader = new FileReader();
     reader.onload = function (event) {
@@ -48,6 +50,28 @@ function App() {
     reader.readAsText(loadedFile);
   };
 
+  const calcWay = () => {
+    //create an empty matrix of cities.length x cities.length
+    let distMatrix = [];
+    for (var i = 0; i < cities.length; i++) {
+      distMatrix[i] = new Array(cities.length);
+    }
+    //for each city calcuate the distance to each other city and store it in the matrix
+    for (let [i, from] of cities.entries()) {
+      for (let [j, to] of cities.entries()) {
+        //console.log(`${i}/${from} ${j}/${to}`)
+        let pointFrom = new LatLng(from[0], from[1]);
+        distMatrix[i][j] = pointFrom.distanceTo(new LatLng(to[0], to[1]));
+      }
+    }
+    console.log(distMatrix); 
+    //greedy nearest neighbour algorithm for finding a first solution: 
+    //starting at the startCity always choose the shortest Trip to an unvisited city.
+    let solution = [startCity]
+
+    console.log(solution); 
+  };
+
   return (
     <Paper style={{ margin: "1.5vh", overflow: "hidden", height: "97vh" }}>
       <Grid container spacing={0} style={{ height: "100%" }}>
@@ -64,8 +88,8 @@ function App() {
             <br />
             <div>
               <div style={{ fontWeight: "bold" }}>Anleitung:</div>
-              Wähle eine kompatible .csv Datei. Die App versucht dann die
-              kürzeste Reiseroute zu berechnen.
+              Wähle eine kompatible .csv Datei und eine Startstadt. Die App
+              versucht dann die kürzeste Reiseroute zu berechnen.
               <div>
                 <input
                   type="file"
@@ -90,8 +114,9 @@ function App() {
                     variant="contained"
                     color="primary"
                     component="span"
-                    disabled={!startCity.length}
+                    disabled={(startCity===null)}
                     style={{ marginTop: 5 }}
+                    onClick={calcWay}
                   >
                     Weg berechnen
                   </Button>
@@ -102,15 +127,15 @@ function App() {
                     labelId="startCityLabel"
                     disabled={!cities.length}
                     id="startCity"
-                    value={startCity.length ? startCity : ""}
+                    value={startCity!==null ? startCity : ""}
                     onChange={(e) => {
                       setStartCity(e.target.value);
                     }}
                   >
-                    {cities.map((city) => {
+                    {cities.map((city, index) => {
                       return (
-                        <MenuItem key={city[2]} value={city}>
-                          {city[2]}
+                        <MenuItem key={index} value={index}>
+                          {cities[index][2]}
                         </MenuItem>
                       );
                     })}
