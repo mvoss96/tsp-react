@@ -15,6 +15,7 @@ function App() {
   const [startCity, setStartCity] = useState(null);
   const [solution, setSolution] = useState([]);
   const [solutionDistance, setSolutionDistance] = useState(null);
+  const [distMatrix, setDistMatrix] = useState([]);
 
   const fileLoadHandler = (event) => {
     let loadedFile = event.target.files[0];
@@ -54,8 +55,8 @@ function App() {
   const changeStartCity = (city) => {
     setStartCity(city);
     setSolution([]);
-    setSolutionDistance(0)
-  }
+    setSolutionDistance(0);
+  };
 
   const calcWay = () => {
     //create an empty matrix of cities.length x cities.length
@@ -75,7 +76,6 @@ function App() {
     //starting at the startCity then always choose the shortest trip to an unvisited city.
     //Do this until all citys are visited
     let solution = [startCity];
-    let totalDistance = 0;
     while (solution.length < cities.length) {
       let nearest, shortestDistance;
       let currentCity = solution[solution.length - 1]; //last entry
@@ -88,14 +88,84 @@ function App() {
           nearest = index;
         }
       }
-      totalDistance += shortestDistance;
       solution.push(nearest);
     }
     //add way back to solution
-    totalDistance += distMatrix[solution[solution.length - 1]][startCity];
     solution.push(startCity);
     setSolution(solution);
-    setSolutionDistance(totalDistance);
+    setDistMatrix(distMatrix);
+  };
+
+  const optSolution = () => {
+    //optimize solution using 2-opt
+    let lastSolution = [];
+    let newSolution = [...solution];
+    let iterations = 0;
+    while (true) {
+      let minI,
+        minJ,
+        minChange = 0;
+      console.log("distMatrix: ", distMatrix);
+      //console.log("solution: ", solution);
+      for (let i = 1; i < newSolution.length - 2; i++) {
+        for (let j = i + 2; j < newSolution.length-1; j++) {
+          let change =
+            distMatrix[newSolution[i]][newSolution[j]] +
+            distMatrix[newSolution[i + 1]][newSolution[j + 1]] -
+            distMatrix[newSolution[i]][newSolution[i + 1]] -
+            distMatrix[newSolution[j]][newSolution[j + 1]];
+          //console.log("testing: ", i, j, change);
+          if (change < minChange) {
+            minI = i;
+            minJ = j;
+            minChange = change;
+          }
+        }
+      }
+
+      //break if no improvement was found or iterations get very high (possibly endless loop)
+      if (minChange >= 0 || iterations > 100) {
+        break;
+      }
+      iterations++;
+      console.log(`found optimization: ${minI} ${minJ} ${minChange}`);
+
+      if (minJ > minI) {
+        newSolution.splice(
+          minI + 1,
+          minJ - minI,
+          ...newSolution.slice(minI + 1, minJ + 1).reverse()
+        );
+      } else {
+        alert("hi");
+      }
+
+      //sanity check that no subtours are present
+      for (let i = 0; i < newSolution.length; i++) {
+        for (let j = 0; j < newSolution.length; j++) {
+          if (
+            newSolution[i] === newSolution[j] &&
+            i !== j &&
+            i !== 0 &&
+            i !== solution.length - 1
+          ) {
+            alert(
+              `Achtung: Beim Lösen ist ein Fehler aufgetreten: Einträge ${i} und ${j} sind identisch)`
+            );
+          }
+        }
+      }
+
+      setSolution(newSolution);
+    }
+  };
+
+  const calcDistance = () => {
+    let distance = 0;
+    for (let i = 0; i < solution.length - 1; i++) {
+      distance += distMatrix[solution[i]][solution[i + 1]];
+    }
+    return distance;
   };
 
   //render the app
@@ -107,7 +177,7 @@ function App() {
             cities={cities}
             solution={solution}
             startCity={startCity}
-            handlePopupClick = {changeStartCity}
+            handlePopupClick={changeStartCity}
           ></MapComponent>
         </Grid>
         <Grid item xs={12} sm={4} style={{ height: "100%" }}>
@@ -158,6 +228,16 @@ function App() {
               >
                 Weg berechnen
               </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                component="span"
+                disabled={startCity === null}
+                style={{ marginTop: 5, marginLeft: 5 }}
+                onClick={optSolution}
+              >
+                Optimieren
+              </Button>
             </div>
             <FormControl style={{ minWidth: 120, marginRight: 10 }}>
               <InputLabel htmlFor="startCityLabel">Startstadt:</InputLabel>
@@ -166,8 +246,8 @@ function App() {
                 disabled={!cities.length}
                 id="startCity"
                 value={startCity !== null ? startCity : ""}
-                onChange={(e)=>{
-                  changeStartCity(e.target.value)
+                onChange={(e) => {
+                  changeStartCity(e.target.value);
                 }}
               >
                 {cities.map((city, index) => {
@@ -181,9 +261,8 @@ function App() {
             </FormControl>
             <div>
               <span style={{ fontWeight: "bold" }}>Weglänge:</span>{" "}
-              {(solutionDistance / 1000).toFixed(2)}km
+              {(calcDistance() / 1000).toFixed(2)}km
             </div>
-            {console.log("solution:", solution)}
             <div>
               {solution.map((destination, index) => {
                 return destination + (index < solution.length - 1 ? "->" : "");
