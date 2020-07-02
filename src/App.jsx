@@ -51,6 +51,12 @@ function App() {
     reader.readAsText(loadedFile);
   };
 
+  const changeStartCity = (city) => {
+    setStartCity(city);
+    setSolution([]);
+    setSolutionDistance(0)
+  }
+
   const calcWay = () => {
     //create an empty matrix of cities.length x cities.length
     let distMatrix = [];
@@ -101,6 +107,7 @@ function App() {
             cities={cities}
             solution={solution}
             startCity={startCity}
+            handlePopupClick = {changeStartCity}
           ></MapComponent>
         </Grid>
         <Grid item xs={12} sm={4} style={{ height: "100%" }}>
@@ -159,9 +166,8 @@ function App() {
                 disabled={!cities.length}
                 id="startCity"
                 value={startCity !== null ? startCity : ""}
-                onChange={(e) => {
-                  setStartCity(e.target.value);
-                  setSolution([]);
+                onChange={(e)=>{
+                  changeStartCity(e.target.value)
                 }}
               >
                 {cities.map((city, index) => {

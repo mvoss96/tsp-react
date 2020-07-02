@@ -14,7 +14,7 @@ const circleIconActive = new L.Icon({
   iconSize: [16, 16],
 });
 
-function MapComponent({ cities, solution, startCity }) {
+function MapComponent({ cities, solution, startCity, handlePopupClick }) {
   //set the zoom od the map to fit all markers
   let bounds = null;
   if (cities.length >= 2) {
@@ -54,9 +54,10 @@ function MapComponent({ cities, solution, startCity }) {
             onMouseOut={(e) => {
               e.target.closePopup();
             }}
+            onclick={()=>{handlePopupClick(index)}}
           >
             {" "}
-            <Popup>{city[2]}</Popup>
+            <Popup >{city[2]}</Popup>
           </Marker>
         );
       })}
