@@ -65,7 +65,6 @@ function App() {
         distMatrix[i][j] = pointFrom.distanceTo(new LatLng(to[0], to[1]));
       }
     }
-    console.log(distMatrix);
     //greedy nearest neighbour algorithm for finding a first solution:
     //starting at the startCity then always choose the shortest trip to an unvisited city.
     //Do this until all citys are visited
@@ -89,16 +88,13 @@ function App() {
     //add way back to solution
     totalDistance += distMatrix[solution[solution.length - 1]][startCity];
     solution.push(startCity);
-
-    console.log(solution);
-    console.log(totalDistance);
     setSolution(solution);
     setSolutionDistance(totalDistance);
   };
 
   //render the app
   return (
-    <Paper style={{ margin: "1.5vh", overflow: "hidden", height: "97vh" }}>
+    <Paper style={{ margin: "1.5vh", height: "97vh", overflow: "hidden" }}>
       <Grid container spacing={0} style={{ height: "100%" }}>
         <Grid item xs={12} sm={8}>
           <MapComponent
@@ -107,71 +103,85 @@ function App() {
             startCity={startCity}
           ></MapComponent>
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <div style={{ height: "100%", padding: "5px" }}>
+        <Grid item xs={12} sm={4} style={{ height: "100%" }}>
+          <div
+            style={{
+              height: "100%",
+              padding: "5px",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "auto",
+            }}
+          >
             <div>
               Diese App wurde als Teil der get-in-IT.de coding challenge
               erstellt: <br />
               Marcus Voß (marcus.voss@campus.tu-berlin.de)
             </div>
             <br />
+            <div style={{ fontWeight: "bold" }}>Anleitung:</div>
+            Wähle eine kompatible .csv Datei und eine Startstadt. Die App
+            versucht dann die kürzeste Reiseroute zu berechnen.
+            <input
+              type="file"
+              id="fileInput"
+              accept=".csv"
+              onChange={fileLoadHandler}
+              style={{ display: "none" }}
+            />
             <div>
-              <div style={{ fontWeight: "bold" }}>Anleitung:</div>
-              Wähle eine kompatible .csv Datei und eine Startstadt. Die App
-              versucht dann die kürzeste Reiseroute zu berechnen.
-              <div>
-                <input
-                  type="file"
-                  id="fileInput"
-                  accept=".csv"
-                  onChange={fileLoadHandler}
-                  style={{ display: "none" }}
-                />
-                <div>
-                  <label htmlFor="fileInput">
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      component="span"
-                      startIcon={<CloudUploadIcon />}
-                      style={{ marginTop: 5, marginRight: 10 }}
-                    >
-                      Dateiauswahl
-                    </Button>
-                  </label>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    component="span"
-                    disabled={startCity === null}
-                    style={{ marginTop: 5 }}
-                    onClick={calcWay}
-                  >
-                    Weg berechnen
-                  </Button>
-                </div>
-                <FormControl style={{ minWidth: 120, marginRight: 10 }}>
-                  <InputLabel htmlFor="startCityLabel">Startstadt:</InputLabel>
-                  <Select
-                    labelId="startCityLabel"
-                    disabled={!cities.length}
-                    id="startCity"
-                    value={startCity !== null ? startCity : ""}
-                    onChange={(e) => {
-                      setStartCity(e.target.value);
-                      setSolution([]);
-                    }}
-                  >
-                    {cities.map((city, index) => {
-                      return (
-                        <MenuItem key={index} value={index}>
-                          {cities[index][2]}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                </FormControl>
-              </div>
+              <label htmlFor="fileInput">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  component="span"
+                  startIcon={<CloudUploadIcon />}
+                  style={{ marginTop: 5, marginRight: 10 }}
+                >
+                  Dateiauswahl
+                </Button>
+              </label>
+              <Button
+                variant="contained"
+                color="primary"
+                component="span"
+                disabled={startCity === null}
+                style={{ marginTop: 5 }}
+                onClick={calcWay}
+              >
+                Weg berechnen
+              </Button>
+            </div>
+            <FormControl style={{ minWidth: 120, marginRight: 10 }}>
+              <InputLabel htmlFor="startCityLabel">Startstadt:</InputLabel>
+              <Select
+                labelId="startCityLabel"
+                disabled={!cities.length}
+                id="startCity"
+                value={startCity !== null ? startCity : ""}
+                onChange={(e) => {
+                  setStartCity(e.target.value);
+                  setSolution([]);
+                }}
+              >
+                {cities.map((city, index) => {
+                  return (
+                    <MenuItem key={index} value={index}>
+                      {`${index}) ${cities[index][2]}`}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+            <div>
+              <span style={{ fontWeight: "bold" }}>Weglänge:</span>{" "}
+              {(solutionDistance / 1000).toFixed(2)}km
+            </div>
+            {console.log("solution:", solution)}
+            <div>
+              {solution.map((destination, index) => {
+                return destination + (index < solution.length - 1 ? "->" : "");
+              })}
             </div>
           </div>
         </Grid>
