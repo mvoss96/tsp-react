@@ -33,9 +33,9 @@ function MapComponent({ cities, solution, startCity }) {
       zoom={3}
       zoomControl={false}
       doubleClickZoom={false}
-      scrollWheelZoom={false}
-      touchZoom={false}
-      dragging={false}
+      scrollWheelZoom={true}
+      touchZoom={true}
+      dragging={true}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
