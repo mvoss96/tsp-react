@@ -223,17 +223,17 @@ function App() {
                 color="primary"
                 component="span"
                 disabled={startCity === null}
-                style={{ marginTop: 5 }}
+                style={{ marginTop: 5, marginRight: 5  }}
                 onClick={calcWay}
               >
-                Weg berechnen
+                Schnelle Lösung
               </Button>
               <Button
                 variant="contained"
                 color="primary"
                 component="span"
-                disabled={startCity === null}
-                style={{ marginTop: 5, marginLeft: 5 }}
+                disabled={solution.length === 0}
+                style={{ marginTop: 5}}
                 onClick={optSolution}
               >
                 Optimieren
@@ -263,7 +263,7 @@ function App() {
               <span style={{ fontWeight: "bold" }}>Weglänge:</span>{" "}
               {(calcDistance() / 1000).toFixed(2)}km
             </div>
-            <div>
+            <div style={{wordWrap: "break-word"}}>
               {solution.map((destination, index) => {
                 return destination + (index < solution.length - 1 ? "->" : "");
               })}
