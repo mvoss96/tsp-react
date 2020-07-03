@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/tsp-react/static/css/main.807c1001.chunk.css",
+    "main.js": "/tsp-react/static/js/main.e51eb4f6.chunk.js",
+    "main.js.map": "/tsp-react/static/js/main.e51eb4f6.chunk.js.map",
+    "runtime-main.js": "/tsp-react/static/js/runtime-main.6a5927ff.js",
+    "runtime-main.js.map": "/tsp-react/static/js/runtime-main.6a5927ff.js.map",
+    "static/css/2.7c35e809.chunk.css": "/tsp-react/static/css/2.7c35e809.chunk.css",
+    "static/js/2.054dfee9.chunk.js": "/tsp-react/static/js/2.054dfee9.chunk.js",
+    "static/js/2.054dfee9.chunk.js.map": "/tsp-react/static/js/2.054dfee9.chunk.js.map",
+    "index.html": "/tsp-react/index.html",
+    "precache-manifest.64c4b5071266f28fbb020da0929238a6.js": "/tsp-react/precache-manifest.64c4b5071266f28fbb020da0929238a6.js",
+    "service-worker.js": "/tsp-react/service-worker.js",
+    "static/css/2.7c35e809.chunk.css.map": "/tsp-react/static/css/2.7c35e809.chunk.css.map",
+    "static/css/main.807c1001.chunk.css.map": "/tsp-react/static/css/main.807c1001.chunk.css.map",
+    "static/js/2.054dfee9.chunk.js.LICENSE.txt": "/tsp-react/static/js/2.054dfee9.chunk.js.LICENSE.txt",
+    "static/media/doubleCircle.png": "/tsp-react/static/media/doubleCircle.88ed7bc2.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.6a5927ff.js",
+    "static/css/2.7c35e809.chunk.css",
+    "static/js/2.054dfee9.chunk.js",
+    "static/css/main.807c1001.chunk.css",
+    "static/js/main.e51eb4f6.chunk.js"
+  ]
+}
