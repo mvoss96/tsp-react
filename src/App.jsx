@@ -1,5 +1,8 @@
+//necessary react imports
 import React, { useState } from "react";
 import MapComponent from "./MapComponent";
+
+//UI-components from material-UI
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
@@ -11,14 +14,20 @@ import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { LatLng } from "leaflet";
 
 function App() {
+  //array of city data [latitude (float),longitude (float), address (string)]
   const [cities, setCities] = useState([]);
+  //index of the start city in city array (int)
   const [startCity, setStartCity] = useState(null);
+  //array containing solution (indizes from city array)
   const [solution, setSolution] = useState([]);
-  const [solutionDistance, setSolutionDistance] = useState(null);
+  //matrix coantaining precalculated distances from each city to each other city
   const [distMatrix, setDistMatrix] = useState([]);
 
+  //load and aprse a user input file.
+  //if valid load data into city state array
   const fileLoadHandler = (event) => {
     let loadedFile = event.target.files[0];
+    //check if a file was submitted
     if (!loadedFile) {
       return;
     }
@@ -27,6 +36,7 @@ function App() {
       let result = event.target.result;
       let newCities = [];
       let lines = result.split("\n");
+      //check if file is valid
       if (
         lines[0] !==
         "Nummer,msg Standort,Straße,Hausnummer,PLZ,Ort,Breitengrad,Längengrad"
@@ -36,7 +46,9 @@ function App() {
         );
         return;
       }
-      lines.shift(1); //remove first line
+      //remove first line
+      lines.shift(1);
+      //parse .csv data
       for (let line of lines) {
         let values = line.split(",");
         if (values.length === 8) {
@@ -52,14 +64,15 @@ function App() {
     reader.readAsText(loadedFile);
   };
 
+  //funtion for setting a new start city
   const changeStartCity = (city) => {
     setStartCity(city);
     setSolution([]);
-    setSolutionDistance(0);
   };
 
-  const calcWay = () => {
-    //create an empty matrix of cities.length x cities.length
+  //generate a first Solution using the Nearest-Neighbor method
+  const calcSolution = () => {
+    //create an empty matrix of size: cities.length x cities.length
     let distMatrix = [];
     for (var i = 0; i < cities.length; i++) {
       distMatrix[i] = new Array(cities.length);
@@ -67,14 +80,14 @@ function App() {
     //for each city calcuate the distance to each other city and store it in the matrix
     for (let [i, from] of cities.entries()) {
       for (let [j, to] of cities.entries()) {
-        //console.log(`${i}/${from} ${j}/${to}`)
         let pointFrom = new LatLng(from[0], from[1]);
         distMatrix[i][j] = pointFrom.distanceTo(new LatLng(to[0], to[1]));
       }
     }
+
     //greedy nearest neighbour algorithm for finding a first solution:
     //starting at the startCity then always choose the shortest trip to an unvisited city.
-    //Do this until all citys are visited
+    //do this until all citys are visited
     let solution = [startCity];
     while (solution.length < cities.length) {
       let nearest, shortestDistance;
@@ -90,31 +103,31 @@ function App() {
       }
       solution.push(nearest);
     }
-    //add way back to solution
+    //add way back to solution to coplete the tour
     solution.push(startCity);
     setSolution(solution);
     setDistMatrix(distMatrix);
   };
 
+  //optimize solution using the 2-opt algorithm
   const optSolution = () => {
-    //optimize solution using 2-opt
-    let lastSolution = [];
+    //copy state varaibele to allow for modification
     let newSolution = [...solution];
     let iterations = 0;
+    //2-opt algorithm: try to find the optimal entries i and j from the solution,
+    //so that the connection from i to j and i+1 to j+1 is shorter then the connection from i to i+1 and from j to j+1.
+    //Continue until no further optimization can be found or 100 iterations were reached.
     while (true) {
       let minI,
         minJ,
         minChange = 0;
-      console.log("distMatrix: ", distMatrix);
-      //console.log("solution: ", solution);
       for (let i = 1; i < newSolution.length - 2; i++) {
-        for (let j = i + 2; j < newSolution.length-1; j++) {
+        for (let j = i + 2; j < newSolution.length - 1; j++) {
           let change =
             distMatrix[newSolution[i]][newSolution[j]] +
             distMatrix[newSolution[i + 1]][newSolution[j + 1]] -
             distMatrix[newSolution[i]][newSolution[i + 1]] -
             distMatrix[newSolution[j]][newSolution[j + 1]];
-          //console.log("testing: ", i, j, change);
           if (change < minChange) {
             minI = i;
             minJ = j;
@@ -122,44 +135,40 @@ function App() {
           }
         }
       }
-
-      //break if no improvement was found or iterations get very high (possibly endless loop)
+      //break if no improvement was found or iterations get very high
+      //(prevent the site from geting unresponsive when the optimization takes to long for larger amounts of cities)
       if (minChange >= 0 || iterations > 100) {
         break;
       }
       iterations++;
+      //apply optimization
       console.log(`found optimization: ${minI} ${minJ} ${minChange}`);
-
-      if (minJ > minI) {
-        newSolution.splice(
-          minI + 1,
-          minJ - minI,
-          ...newSolution.slice(minI + 1, minJ + 1).reverse()
-        );
-      } else {
-        alert("hi");
-      }
-
-      //sanity check that no subtours are present
-      for (let i = 0; i < newSolution.length; i++) {
-        for (let j = 0; j < newSolution.length; j++) {
-          if (
-            newSolution[i] === newSolution[j] &&
-            i !== j &&
-            i !== 0 &&
-            i !== solution.length - 1
-          ) {
-            alert(
-              `Achtung: Beim Lösen ist ein Fehler aufgetreten: Einträge ${i} und ${j} sind identisch)`
-            );
-          }
+      newSolution.splice(
+        minI + 1,
+        minJ - minI,
+        ...newSolution.slice(minI + 1, minJ + 1).reverse()
+      );
+    }
+    //sanity check that no subtours are present
+    for (let i = 0; i < newSolution.length; i++) {
+      for (let j = 0; j < newSolution.length; j++) {
+        if (
+          newSolution[i] === newSolution[j] &&
+          i !== j &&
+          i !== 0 &&
+          i !== solution.length - 1
+        ) {
+          alert(
+            `Achtung: Beim Lösen ist ein Fehler aufgetreten: Einträge ${i} und ${j} sind identisch)`
+          );
         }
       }
-
-      setSolution(newSolution);
     }
+    //apply found optimization to solution
+    setSolution(newSolution);
   };
 
+  //calculate the total distance of the current solution
   const calcDistance = () => {
     let distance = 0;
     for (let i = 0; i < solution.length - 1; i++) {
@@ -193,12 +202,16 @@ function App() {
             <div>
               Diese App wurde als Teil der get-in-IT.de coding challenge
               erstellt: <br />
-              Marcus Voß (marcus.voss@campus.tu-berlin.de)
+              Kontakt: Marcus Voß (marcus.voss@campus.tu-berlin.de)
             </div>
             <br />
             <div style={{ fontWeight: "bold" }}>Anleitung:</div>
-            Wähle eine kompatible .csv Datei und eine Startstadt. Die App
-            versucht dann die kürzeste Reiseroute zu berechnen.
+            DATEIAUSWAHL: Lade eine kompatible .csv Datei. <br />
+            SCHNELLE LÖSUNG: Generiere eine erste Lösung mittels
+            "Nearest-Neighbor-Heuristik". Hierzu muss zunächst eine Startstadt
+            ausgewählt werden. Entweder über die Liste oder mittels Klicken auf
+            der Karte <br />
+            OPTIMIEREN: Optimiere die Lösung mittels 2-opt-Verfahren.
             <input
               type="file"
               id="fileInput"
@@ -223,8 +236,8 @@ function App() {
                 color="primary"
                 component="span"
                 disabled={startCity === null}
-                style={{ marginTop: 5, marginRight: 5  }}
-                onClick={calcWay}
+                style={{ marginTop: 5, marginRight: 5 }}
+                onClick={calcSolution}
               >
                 Schnelle Lösung
               </Button>
@@ -233,7 +246,7 @@ function App() {
                 color="primary"
                 component="span"
                 disabled={solution.length === 0}
-                style={{ marginTop: 5}}
+                style={{ marginTop: 5 }}
                 onClick={optSolution}
               >
                 Optimieren
@@ -263,7 +276,7 @@ function App() {
               <span style={{ fontWeight: "bold" }}>Weglänge:</span>{" "}
               {(calcDistance() / 1000).toFixed(2)}km
             </div>
-            <div style={{wordWrap: "break-word"}}>
+            <div style={{ wordWrap: "break-word" }}>
               {solution.map((destination, index) => {
                 return destination + (index < solution.length - 1 ? "->" : "");
               })}

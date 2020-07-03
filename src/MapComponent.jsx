@@ -1,4 +1,6 @@
+//necessary react imports
 import React from "react";
+//import leaflet mapping components
 import { Map, Marker, Popup, TileLayer } from "react-leaflet";
 import Polyline from "react-leaflet-arrowheads";
 import L from "leaflet";
@@ -15,7 +17,7 @@ const circleIconActive = new L.Icon({
 });
 
 function MapComponent({ cities, solution, startCity, handlePopupClick }) {
-  //set the zoom od the map to fit all markers
+  //set the zoom of the map to fit all markers
   let bounds = null;
   if (cities.length >= 2) {
     bounds = L.latLngBounds();
@@ -41,26 +43,30 @@ function MapComponent({ cities, solution, startCity, handlePopupClick }) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
-      {//Place markers  for all cities
-      cities.map((city, index) => {
-        return (
-          <Marker
-            icon={index === startCity ? circleIconActive : circleIcon}
-            position={[city[0], city[1]]}
-            key={index}
-            onMouseOver={(e) => {
-              e.target.openPopup();
-            }}
-            onMouseOut={(e) => {
-              e.target.closePopup();
-            }}
-            onclick={()=>{handlePopupClick(index)}}
-          >
-            {" "}
-            <Popup >{city[2]}</Popup>
-          </Marker>
-        );
-      })}
+      {
+        //Place markers  for all cities and create a polyline that corresponds to the current solution
+        cities.map((city, index) => {
+          return (
+            <Marker
+              icon={index === startCity ? circleIconActive : circleIcon}
+              position={[city[0], city[1]]}
+              key={index}
+              onMouseOver={(e) => {
+                e.target.openPopup();
+              }}
+              onMouseOut={(e) => {
+                e.target.closePopup();
+              }}
+              onclick={() => {
+                handlePopupClick(index);
+              }}
+            >
+              {" "}
+              <Popup>{city[2]}</Popup>
+            </Marker>
+          );
+        })
+      }
       <Polyline
         positions={solution.map((i) => {
           return cities[i];
