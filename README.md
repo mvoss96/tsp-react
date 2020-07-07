@@ -1,3 +1,8 @@
+Diese App wurde als Teil der get-in-IT.de coding challenge erstellt: Sie löst das Problem des handlungsreisenden mittels "Nearest-Neighbor-Heuristik" sowie dem 2-opt Verfahren.
+
+Eine Live Demo befindet sich unter folgendem Link: https://mvoss96.github.io/tsp-react/
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
