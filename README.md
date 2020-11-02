@@ -2,6 +2,8 @@ Diese App wurde als Teil der get-in-IT.de coding challenge erstellt: Sie löst d
 
 Eine Live Demo befindet sich unter folgendem Link: https://mvoss96.github.io/tsp-react/
 
+![Screenshot1]("screenshot.png")
+
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
